@@ -1,0 +1,31 @@
+### Test GET / WEBSITE
+
+GET http://localhost:8383
+
+### Test GET /dashboard WEBSITE
+
+GET http://localhost:8383/dashboard
+
+
+### Test GET /api/data WEBSITE
+
+GET http://localhost:8383/api/data
+
+
+### DATA ENDPOINT FOR ADDING A USER
+
+POST http://localhost:8383/api/data
+Content-Type: application/json
+
+{
+    "name":"niggamesh"
+}
+
+### DELETE ENDPOINT
+DELETE  http://localhost:8383/api/data
+Content-Type: application/json
+
+{
+    "name":"niggamesh"
+}
+
