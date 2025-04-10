@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Weather Info</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 2rem;
+      background: #f0f0f0;
+    }
+    h1, h2 {
+      color: #333;
+    }
+    .section {
+      background: white;
+      padding: 1rem 1.5rem;
+      border-radius: 12px;
+      margin-bottom: 2rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    .forecast-container {
+      display: flex;
+      overflow-x: auto;
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+    .forecast-card {
+      flex: 0 0 auto;
+      background: #fafafa;
+      padding: 1rem;
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      min-width: 200px;
+    }
+    pre {
+      background: #eee;
+      padding: 1rem;
+      border-radius: 8px;
+      overflow-x: auto;
+    }
+  </style>
+</head>
+<body>
+  <h1>🌤️ Full Weather Info</h1>
+  <div id="output">Loading weather data...</div>
+  <script>
+    fetch('/api/weather')
+      .then(res => res.json())
+      .then(data => {
+        const current = data.current;
+        const forecastList = data.forecast.list;
+  
+        // 🟩 CURRENT WEATHER
+        const currentHTML = `
+          <h2>📍 Current Weather: ${current.name}</h2>
+          <p><strong>Temperature:</strong> ${current.main.temp} °C</p>
+          <p><strong>Weather:</strong> ${current.weather[0].main} (${current.weather[0].description})</p>
+          <p><strong>Humidity:</strong> ${current.main.humidity}%</p>
+          <p><strong>Pressure:</strong> ${current.main.pressure} hPa</p>
+          <p><strong>Wind:</strong> ${current.wind.speed} m/s, direction: ${current.wind.deg}°</p>
+          <p><strong>Cloudiness:</strong> ${current.clouds.all}%</p>
+        `;
+  
+        // 🟦 5-DAY FORECAST (1 per day around noon)
+        const filteredDays = {};
+        const dailyForecasts = [];
+  
+        forecastList.forEach(entry => {
+          const date = new Date(entry.dt * 1000);
+          const day = date.toDateString();
+          if (!filteredDays[day] && date.getHours() >= 11 && date.getHours() <= 14) {
+            filteredDays[day] = true;
+            dailyForecasts.push(entry);
+          }
+        });
+  
+        const forecastHTML = dailyForecasts.map(entry => {
+          const date = new Date(entry.dt * 1000);
+          return `
+            <div style="border:1px solid #ccc; margin:1rem 0; padding:1rem; border-radius:8px; background:#fff;">
+              <strong>${date.toDateString()} @ ${date.toLocaleTimeString()}</strong><br>
+              🌡️ Temp: ${entry.main.temp} °C<br>
+              🌤️ Weather: ${entry.weather[0].main} (${entry.weather[0].description})<br>
+              💧 Humidity: ${entry.main.humidity}%<br>
+              🔽 Pressure: ${entry.main.pressure} hPa<br>
+              ☁️ Cloudiness: ${entry.clouds.all}%<br>
+              🌬️ Wind: ${entry.wind.speed} m/s, direction: ${entry.wind.deg}°<br>
+            </div>
+          `;
+        }).join("");
+  
+        document.getElementById("output").innerHTML = `
+          ${currentHTML}
+          <hr>
+          <h2>📆 5-Day Forecast (Daily Summary)</h2>
+          ${forecastHTML}
+        `;
+      })
+      .catch(err => {
+        document.getElementById("output").innerHTML = `<p style="color:red;">❌ Failed to fetch weather data.</p>`;
+        console.error(err);
+      });
+  </script>
+  
+</body>
+</html>
